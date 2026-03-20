@@ -100,8 +100,7 @@ export function useQRCode(data: string, style: QRStyle = DEFAULT_QR_STYLE) {
     if (!qrRef.current) return null;
     const raw = await qrRef.current.getRawData(format);
     if (!raw) return null;
-    if (raw instanceof Blob) return raw;
-    return new Blob([raw]);
+    return raw as unknown as Blob;
   }, []);
 
   return { containerRef, download, getBlob, isReady };
