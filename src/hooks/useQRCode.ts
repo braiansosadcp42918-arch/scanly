@@ -98,8 +98,10 @@ export function useQRCode(data: string, style: QRStyle = DEFAULT_QR_STYLE) {
 
   const getBlob = useCallback(async (format: 'png' | 'svg' | 'jpeg' = 'png'): Promise<Blob | null> => {
     if (!qrRef.current) return null;
-    const blob = await qrRef.current.getRawData(format);
-    return blob || null;
+    const raw = await qrRef.current.getRawData(format);
+    if (!raw) return null;
+    if (raw instanceof Blob) return raw;
+    return new Blob([raw]);
   }, []);
 
   return { containerRef, download, getBlob, isReady };
