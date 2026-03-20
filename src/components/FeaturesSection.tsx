@@ -1,32 +1,33 @@
 import { Zap, Palette, Download, Shield, Smartphone, History } from 'lucide-react';
 import { motion } from 'framer-motion';
-
-const features = [
-  { icon: Zap, title: 'Generación instantánea', desc: 'Tu QR se actualiza en tiempo real mientras escribes.' },
-  { icon: Palette, title: 'Personalización total', desc: 'Colores, estilos, esquinas, logos y presets profesionales.' },
-  { icon: Download, title: 'Exportación premium', desc: 'Descarga en PNG, SVG de alta resolución.' },
-  { icon: Shield, title: 'Corrección de errores', desc: 'Hasta 30% de redundancia para QR siempre legibles.' },
-  { icon: Smartphone, title: '100% responsive', desc: 'Funciona perfecto en móvil, tablet y escritorio.' },
-  { icon: History, title: 'Historial local', desc: 'Tus últimos 20 códigos QR guardados automáticamente.' },
-];
+import { useI18n } from '@/lib/i18n';
 
 export default function FeaturesSection() {
+  const { t } = useI18n();
+
+  const features = [
+    { icon: Zap, title: t('feat.instant'), desc: t('feat.instantDesc') },
+    { icon: Palette, title: t('feat.custom'), desc: t('feat.customDesc') },
+    { icon: Download, title: t('feat.export'), desc: t('feat.exportDesc') },
+    { icon: Shield, title: t('feat.error'), desc: t('feat.errorDesc') },
+    { icon: Smartphone, title: t('feat.responsive'), desc: t('feat.responsiveDesc') },
+    { icon: History, title: t('feat.history'), desc: t('feat.historyDesc') },
+  ];
+
   return (
     <section id="features" className="py-16 md:py-24">
       <div className="container">
         <div className="text-center mb-14">
           <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight mb-3">
-            Funciones de nivel <span className="gradient-text">profesional</span>
+            {t('feat.title1')} <span className="gradient-text">{t('feat.title2')}</span>
           </h2>
-          <p className="text-muted-foreground max-w-lg mx-auto">
-            Todo lo que necesitas para crear QR con calidad premium, sin pagar nada.
-          </p>
+          <p className="text-muted-foreground max-w-lg mx-auto">{t('feat.subtitle')}</p>
         </div>
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 max-w-5xl mx-auto">
           {features.map((f, i) => (
             <motion.div
-              key={f.title}
+              key={i}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}

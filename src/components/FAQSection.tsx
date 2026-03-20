@@ -1,25 +1,27 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown } from 'lucide-react';
-
-const faqs = [
-  { q: '¿Es realmente gratis?', a: 'Sí, Scanly es 100% gratuito. No hay límites de generación, sin registro ni pagos ocultos.' },
-  { q: '¿Los códigos QR caducan?', a: 'No. Los QR generados con Scanly son estáticos y funcionan para siempre. No dependen de nuestro servidor.' },
-  { q: '¿Puedo usar los QR con fines comerciales?', a: 'Absolutamente. Los códigos QR que generas son tuyos y puedes usarlos como quieras.' },
-  { q: '¿En qué formatos puedo descargar?', a: 'Puedes descargar en PNG y SVG de alta resolución, ideales para impresión y web.' },
-  { q: '¿Puedo agregar mi logo al QR?', a: 'Sí. Sube tu logo desde la sección de personalización y ajusta el tamaño. Recomendamos usar corrección de errores alta (H).' },
-  { q: '¿Mis datos son almacenados?', a: 'No. Todo se procesa en tu navegador. No enviamos ningún dato a servidores externos.' },
-];
+import { useI18n } from '@/lib/i18n';
 
 export default function FAQSection() {
+  const { t } = useI18n();
   const [open, setOpen] = useState<number | null>(null);
+
+  const faqs = [
+    { q: t('faq.q1'), a: t('faq.a1') },
+    { q: t('faq.q2'), a: t('faq.a2') },
+    { q: t('faq.q3'), a: t('faq.a3') },
+    { q: t('faq.q4'), a: t('faq.a4') },
+    { q: t('faq.q5'), a: t('faq.a5') },
+    { q: t('faq.q6'), a: t('faq.a6') },
+  ];
 
   return (
     <section id="faq" className="py-16 md:py-24">
       <div className="container max-w-2xl">
         <div className="text-center mb-14">
           <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight mb-3">
-            Preguntas <span className="gradient-text">frecuentes</span>
+            {t('faq.title1')} <span className="gradient-text">{t('faq.title2')}</span>
           </h2>
         </div>
 
