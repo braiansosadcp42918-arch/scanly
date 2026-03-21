@@ -554,9 +554,8 @@ export default function QRGenerator() {
                 <div className="relative w-[300px] h-[300px]">
                   {/* QR container - always mounted, CSS animation on change */}
                   <div
-                    ref={(el) => { qrWrapperRef.current = el; }}
-                    key={animKey}
-                    className={`w-full h-full ${isGenerated ? 'animate-scale-in' : ''}`}
+                    ref={qrWrapperRef}
+                    className="w-full h-full"
                   >
                     <div
                       ref={containerRef}
