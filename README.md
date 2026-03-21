@@ -1,3 +1,3 @@
-# Welcome to your Lovable project
+# Scanly
 
-TODO: Document your project here
+El mejor generador de qr gratuito
