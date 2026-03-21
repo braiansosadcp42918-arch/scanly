@@ -60,7 +60,11 @@ export default function QRGenerator() {
   // Trigger animation when QR updates
   useEffect(() => {
     if (isGenerated && qrWrapperRef.current) {
-      setAnimKey(k => k + 1);
+      const el = qrWrapperRef.current;
+      el.style.animation = 'none';
+      // Force reflow
+      void el.offsetHeight;
+      el.style.animation = 'qr-pop 0.3s ease-out';
     }
   }, [qrData, style, isGenerated]);
 
