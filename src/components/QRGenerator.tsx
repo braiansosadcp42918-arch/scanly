@@ -57,6 +57,13 @@ export default function QRGenerator() {
   const { containerRef, download, getBlob, isReady } = useQRCode(qrData, style);
   const { history, addToHistory, clearHistory } = useQRHistory();
 
+  // Trigger animation when QR updates
+  useEffect(() => {
+    if (isGenerated && qrWrapperRef.current) {
+      setAnimKey(k => k + 1);
+    }
+  }, [qrData, style, isGenerated]);
+
   const handleGenerate = useCallback(() => {
     const result = config.fields
       ? validateQRInput(contentType, '', fields)
