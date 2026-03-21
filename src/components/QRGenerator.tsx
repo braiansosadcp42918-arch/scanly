@@ -43,7 +43,6 @@ export default function QRGenerator() {
   const [showDownloadModal, setShowDownloadModal] = useState(false);
   const [downloadFormat, setDownloadFormat] = useState<'png' | 'svg' | 'jpeg'>('png');
   const [showHistory, setShowHistory] = useState(false);
-  const [animKey, setAnimKey] = useState(0);
   const qrWrapperRef = useRef<HTMLDivElement>(null);
 
   const config = QR_CONTENT_TYPES.find(c => c.type === contentType)!;
