@@ -532,61 +532,71 @@ export default function QRGenerator() {
             </AnimatePresence>
           </div>
 
-          {/* Right: QR Preview */}
-          <div className="lg:sticky lg:top-24 space-y-4">
-            <div className="bg-card rounded-2xl border border-border p-8 shadow-elevated flex flex-col items-center">
-              <p className="text-xs font-medium text-muted-foreground mb-4 uppercase tracking-wider">{t('gen.preview')}</p>
+          {/* Right: QR Preview — sticky on desktop, normal flow on mobile */}
+          <div className="lg:self-start">
+            <div className="lg:sticky lg:top-24 space-y-4">
+              <div className="bg-card rounded-2xl border border-border p-8 shadow-elevated flex flex-col items-center">
+                <p className="text-xs font-medium text-muted-foreground mb-4 uppercase tracking-wider">{t('gen.preview')}</p>
 
-              <div className="relative w-[300px] h-[300px]">
-                {/* QR container - always mounted */}
-                <div
-                  ref={containerRef}
-                  className={`rounded-xl overflow-hidden w-full h-full ${isGenerated ? '' : 'invisible'}`}
-                  style={{ background: isGenerated && style.transparentBg ? 'repeating-conic-gradient(#e5e7eb 0% 25%, transparent 0% 50%) 0 0 / 16px 16px' : undefined }}
-                />
-                {/* Placeholder overlay */}
-                {!isGenerated && (
-                  <div className="absolute inset-0 rounded-xl border-2 border-dashed border-border flex flex-col items-center justify-center bg-secondary/30">
-                    <QrCode className="w-20 h-20 text-muted-foreground/20 mb-4" />
-                    <p className="text-sm font-medium text-muted-foreground">{t('gen.placeholder')}</p>
-                    <p className="text-xs text-muted-foreground/60 mt-1 text-center px-4">{t('gen.placeholderHint')}</p>
-                  </div>
-                )}
+                <div className="relative w-[300px] h-[300px]">
+                  {/* QR container - always mounted, animated on change */}
+                  <motion.div
+                    key={isGenerated ? `${qrData}-${style.dotsColor}-${style.dotsType}-${style.backgroundColor}-${style.transparentBg}-${style.cornersSquareType}-${style.cornersDotType}-${style.margin}-${style.errorCorrectionLevel}` : 'empty'}
+                    initial={{ opacity: 0, scale: 0.92 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.3, ease: 'easeOut' }}
+                    className="w-full h-full"
+                  >
+                    <div
+                      ref={containerRef}
+                      className={`rounded-xl overflow-hidden w-full h-full ${isGenerated ? '' : 'invisible'}`}
+                      style={{ background: isGenerated && style.transparentBg ? 'repeating-conic-gradient(#e5e7eb 0% 25%, transparent 0% 50%) 0 0 / 16px 16px' : undefined }}
+                    />
+                  </motion.div>
+                  {/* Placeholder overlay */}
+                  {!isGenerated && (
+                    <div className="absolute inset-0 rounded-xl border-2 border-dashed border-border flex flex-col items-center justify-center bg-secondary/30">
+                      <QrCode className="w-20 h-20 text-muted-foreground/20 mb-4" />
+                      <p className="text-sm font-medium text-muted-foreground">{t('gen.placeholder')}</p>
+                      <p className="text-xs text-muted-foreground/60 mt-1 text-center px-4">{t('gen.placeholderHint')}</p>
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
 
-            {/* Actions */}
-            <div className="grid grid-cols-1 gap-2">
-              <button
-                onClick={() => isGenerated && setShowDownloadModal(true)}
-                disabled={!isGenerated}
-                className={`gradient-bg text-primary-foreground py-2.5 rounded-xl text-sm font-semibold shadow-premium inline-flex items-center justify-center gap-1.5 transition-all ${
-                  isGenerated ? 'hover:opacity-90' : 'opacity-40 cursor-not-allowed'
-                }`}
-              >
-                <Download className="w-3.5 h-3.5" /> {t('gen.download')}
-              </button>
-            </div>
+              {/* Actions */}
+              <div className="grid grid-cols-1 gap-2">
+                <button
+                  onClick={() => isGenerated && setShowDownloadModal(true)}
+                  disabled={!isGenerated}
+                  className={`gradient-bg text-primary-foreground py-2.5 rounded-xl text-sm font-semibold shadow-premium inline-flex items-center justify-center gap-1.5 transition-all ${
+                    isGenerated ? 'hover:opacity-90' : 'opacity-40 cursor-not-allowed'
+                  }`}
+                >
+                  <Download className="w-3.5 h-3.5" /> {t('gen.download')}
+                </button>
+              </div>
 
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                onClick={handleCopy}
-                disabled={!isGenerated}
-                className={`py-2.5 rounded-xl text-sm font-medium border border-border bg-card inline-flex items-center justify-center gap-1.5 transition-colors ${
-                  isGenerated ? 'hover:bg-secondary' : 'opacity-40 cursor-not-allowed'
-                }`}
-              >
-                <Copy className="w-3.5 h-3.5" /> {t('gen.copy')}
-              </button>
-              <button
-                onClick={handleShare}
-                disabled={!isGenerated}
-                className={`py-2.5 rounded-xl text-sm font-medium border border-border bg-card inline-flex items-center justify-center gap-1.5 transition-colors ${
-                  isGenerated ? 'hover:bg-secondary' : 'opacity-40 cursor-not-allowed'
-                }`}
-              >
-                <Share className="w-3.5 h-3.5" /> {t('gen.share')}
-              </button>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  onClick={handleCopy}
+                  disabled={!isGenerated}
+                  className={`py-2.5 rounded-xl text-sm font-medium border border-border bg-card inline-flex items-center justify-center gap-1.5 transition-colors ${
+                    isGenerated ? 'hover:bg-secondary' : 'opacity-40 cursor-not-allowed'
+                  }`}
+                >
+                  <Copy className="w-3.5 h-3.5" /> {t('gen.copy')}
+                </button>
+                <button
+                  onClick={handleShare}
+                  disabled={!isGenerated}
+                  className={`py-2.5 rounded-xl text-sm font-medium border border-border bg-card inline-flex items-center justify-center gap-1.5 transition-colors ${
+                    isGenerated ? 'hover:bg-secondary' : 'opacity-40 cursor-not-allowed'
+                  }`}
+                >
+                  <Share className="w-3.5 h-3.5" /> {t('gen.share')}
+                </button>
+              </div>
             </div>
           </div>
         </div>
