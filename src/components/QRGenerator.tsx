@@ -548,20 +548,18 @@ export default function QRGenerator() {
                 <p className="text-xs font-medium text-muted-foreground mb-4 uppercase tracking-wider">{t('gen.preview')}</p>
 
                 <div className="relative w-[300px] h-[300px]">
-                  {/* QR container - always mounted, animated on change */}
-                  <motion.div
-                    key={isGenerated ? `${qrData}-${style.dotsColor}-${style.dotsType}-${style.backgroundColor}-${style.transparentBg}-${style.cornersSquareType}-${style.cornersDotType}-${style.margin}-${style.errorCorrectionLevel}` : 'empty'}
-                    initial={{ opacity: 0, scale: 0.92 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.3, ease: 'easeOut' }}
-                    className="w-full h-full"
+                  {/* QR container - always mounted, CSS animation on change */}
+                  <div
+                    ref={(el) => { qrWrapperRef.current = el; }}
+                    key={animKey}
+                    className={`w-full h-full ${isGenerated ? 'animate-scale-in' : ''}`}
                   >
                     <div
                       ref={containerRef}
                       className={`rounded-xl overflow-hidden w-full h-full ${isGenerated ? '' : 'invisible'}`}
                       style={{ background: isGenerated && style.transparentBg ? 'repeating-conic-gradient(#e5e7eb 0% 25%, transparent 0% 50%) 0 0 / 16px 16px' : undefined }}
                     />
-                  </motion.div>
+                  </div>
                   {/* Placeholder overlay */}
                   {!isGenerated && (
                     <div className="absolute inset-0 rounded-xl border-2 border-dashed border-border flex flex-col items-center justify-center bg-secondary/30">
