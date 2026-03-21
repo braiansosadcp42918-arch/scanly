@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { QR_CONTENT_TYPES, buildQRData, type QRContentType, type QRStyle, DEFAULT_QR_STYLE, QR_PRESETS } from '@/lib/qr-types';
 import { useQRCode, useQRHistory } from '@/hooks/useQRCode';
 import { validateQRInput } from '@/lib/validation';
