@@ -537,22 +537,22 @@ export default function QRGenerator() {
             <div className="bg-card rounded-2xl border border-border p-8 shadow-elevated flex flex-col items-center">
               <p className="text-xs font-medium text-muted-foreground mb-4 uppercase tracking-wider">{t('gen.preview')}</p>
 
-              {isGenerated ? (
+              <div className="relative w-[300px] h-[300px]">
+                {/* QR container - always mounted */}
                 <div
                   ref={containerRef}
-                  className="rounded-xl overflow-hidden"
-                  style={{ background: style.transparentBg ? 'repeating-conic-gradient(#e5e7eb 0% 25%, transparent 0% 50%) 0 0 / 16px 16px' : undefined }}
+                  className={`rounded-xl overflow-hidden w-full h-full ${isGenerated ? '' : 'invisible'}`}
+                  style={{ background: isGenerated && style.transparentBg ? 'repeating-conic-gradient(#e5e7eb 0% 25%, transparent 0% 50%) 0 0 / 16px 16px' : undefined }}
                 />
-              ) : (
-                /* Placeholder */
-                <div className="w-[300px] h-[300px] rounded-xl border-2 border-dashed border-border flex flex-col items-center justify-center bg-secondary/30">
-                  <QrCode className="w-20 h-20 text-muted-foreground/20 mb-4" />
-                  <p className="text-sm font-medium text-muted-foreground">{t('gen.placeholder')}</p>
-                  <p className="text-xs text-muted-foreground/60 mt-1 text-center px-4">{t('gen.placeholderHint')}</p>
-                </div>
-              )}
-              {/* Hidden container for QR rendering when not yet generated */}
-              {!isGenerated && <div ref={containerRef} className="hidden" />}
+                {/* Placeholder overlay */}
+                {!isGenerated && (
+                  <div className="absolute inset-0 rounded-xl border-2 border-dashed border-border flex flex-col items-center justify-center bg-secondary/30">
+                    <QrCode className="w-20 h-20 text-muted-foreground/20 mb-4" />
+                    <p className="text-sm font-medium text-muted-foreground">{t('gen.placeholder')}</p>
+                    <p className="text-xs text-muted-foreground/60 mt-1 text-center px-4">{t('gen.placeholderHint')}</p>
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Actions */}
