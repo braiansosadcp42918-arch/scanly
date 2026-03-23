@@ -7,6 +7,9 @@ import { useState, useMemo } from "react";
 import { I18nContext, getTranslator, type Lang } from "@/lib/i18n";
 import Index from "./pages/Index.tsx";
 import NotFound from "./pages/NotFound.tsx";
+import PrivacyPolicy from "./pages/PrivacyPolicy.tsx";
+import TermsOfUse from "./pages/TermsOfUse.tsx";
+import LegalNotice from "./pages/LegalNotice.tsx";
 
 const queryClient = new QueryClient();
 
@@ -40,6 +43,9 @@ const App = () => {
           <BrowserRouter>
             <Routes>
               <Route path="/" element={<Index />} />
+              <Route path="/privacy" element={<PrivacyPolicy />} />
+              <Route path="/terms" element={<TermsOfUse />} />
+              <Route path="/legal" element={<LegalNotice />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>

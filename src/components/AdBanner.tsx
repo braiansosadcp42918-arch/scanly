@@ -1,15 +1,48 @@
-import { useI18n } from '@/lib/i18n';
+import { useEffect, useRef } from 'react';
 
-export default function AdBanner({ className = '' }: { className?: string }) {
-  const { t } = useI18n();
+interface AdBannerProps {
+  className?: string;
+  slot?: string;
+  format?: 'auto' | 'horizontal' | 'vertical' | 'rectangle';
+  responsive?: boolean;
+}
+
+/* Ad Slot — Google AdSense responsive ad unit */
+export default function AdBanner({
+  className = '',
+  slot = '',
+  format = 'auto',
+  responsive = true,
+}: AdBannerProps) {
+  const adRef = useRef<HTMLModElement>(null);
+  const pushed = useRef(false);
+
+  useEffect(() => {
+    if (pushed.current) return;
+    try {
+      const w = window as any;
+      if (w.adsbygoogle && adRef.current) {
+        w.adsbygoogle.push({});
+        pushed.current = true;
+      }
+    } catch {
+      // AdSense not loaded yet — ad slot will remain empty
+    }
+  }, []);
 
   return (
+    /* Ad Slot container */
     <div className={`w-full flex items-center justify-center ${className}`}>
-      <div className="w-full max-w-3xl bg-secondary/50 border border-border rounded-xl p-4 text-center">
-        <span className="text-[10px] uppercase tracking-widest text-muted-foreground/60 block mb-1">{t('ad.label')}</span>
-        <div className="h-16 md:h-20 flex items-center justify-center text-muted-foreground/40 text-sm">
-          {t('ad.placeholder')}
-        </div>
+      <div className="w-full max-w-4xl">
+        <ins
+          ref={adRef}
+          className="adsbygoogle"
+          style={{ display: 'block' }}
+          data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"   /* TODO: Replace with your AdSense publisher ID */
+          data-ad-slot={slot || 'XXXXXXXXXX'}         /* TODO: Replace with your ad slot ID */
+          data-ad-format={format}
+          data-full-width-responsive={responsive ? 'true' : 'false'}
+        />
       </div>
     </div>
   );

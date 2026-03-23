@@ -1,5 +1,6 @@
 import { QrCode } from 'lucide-react';
 import { useI18n } from '@/lib/i18n';
+import { Link } from 'react-router-dom';
 
 export default function Footer() {
   const { t } = useI18n();
@@ -33,9 +34,9 @@ export default function Footer() {
           <div>
             <h4 className="font-semibold text-sm mb-3">{t('footer.legal')}</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><a href="#" className="hover:text-foreground transition-colors">{t('footer.privacy')}</a></li>
-              <li><a href="#" className="hover:text-foreground transition-colors">{t('footer.terms')}</a></li>
-              <li><a href="#" className="hover:text-foreground transition-colors">{t('footer.notice')}</a></li>
+              <li><Link to="/privacy" className="hover:text-foreground transition-colors">{t('footer.privacy')}</Link></li>
+              <li><Link to="/terms" className="hover:text-foreground transition-colors">{t('footer.terms')}</Link></li>
+              <li><Link to="/legal" className="hover:text-foreground transition-colors">{t('footer.notice')}</Link></li>
             </ul>
           </div>
         </div>
