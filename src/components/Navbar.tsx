@@ -3,6 +3,7 @@ import { useI18n, LANG_LABELS, type Lang } from '@/lib/i18n';
 import { Moon, Sun, QrCode, Globe, Menu, X } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useState, useRef, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 
 export default function Navbar() {
   const { isDark, toggle } = useTheme();
