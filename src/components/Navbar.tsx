@@ -3,6 +3,7 @@ import { useI18n, LANG_LABELS, type Lang } from '@/lib/i18n';
 import { Moon, Sun, QrCode, Globe, Menu, X } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useState, useRef, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 
 export default function Navbar() {
   const { isDark, toggle } = useTheme();
@@ -10,6 +11,9 @@ export default function Navbar() {
   const [showLangMenu, setShowLangMenu] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const langRef = useRef<HTMLDivElement>(null);
+  const location = useLocation();
+  const isHome = location.pathname === '/';
+  const linkPrefix = isHome ? '' : '/';
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -28,7 +32,7 @@ export default function Navbar() {
       className="sticky top-0 z-50 glass border-b border-border/50"
     >
       <div className="container flex items-center justify-between h-16">
-        <a href="#" className="flex items-center gap-2.5 font-extrabold text-xl tracking-tight">
+        <a href="/" className="flex items-center gap-2.5 font-extrabold text-xl tracking-tight">
           <div className="gradient-bg rounded-lg p-1.5">
             <QrCode className="w-5 h-5 text-primary-foreground" />
           </div>
@@ -36,10 +40,10 @@ export default function Navbar() {
         </a>
 
         <div className="hidden md:flex items-center gap-8 text-sm font-medium text-muted-foreground">
-          <a href="#generator" className="hover:text-foreground transition-colors">{t('nav.generator')}</a>
-          <a href="#features" className="hover:text-foreground transition-colors">{t('nav.features')}</a>
-          <a href="#templates" className="hover:text-foreground transition-colors">{t('nav.templates')}</a>
-          <a href="#faq" className="hover:text-foreground transition-colors">{t('nav.faq')}</a>
+          <a href={`${linkPrefix}#generator`} className="hover:text-foreground transition-colors">{t('nav.generator')}</a>
+          <a href={`${linkPrefix}#features`} className="hover:text-foreground transition-colors">{t('nav.features')}</a>
+          <a href={`${linkPrefix}#templates`} className="hover:text-foreground transition-colors">{t('nav.templates')}</a>
+          <a href={`${linkPrefix}#faq`} className="hover:text-foreground transition-colors">{t('nav.faq')}</a>
         </div>
 
         <div className="flex items-center gap-2">
@@ -91,10 +95,10 @@ export default function Navbar() {
       {showMobileMenu && (
         <div className="md:hidden border-t border-border/50 bg-card/95 backdrop-blur-xl">
           <div className="container py-4 flex flex-col gap-3 text-sm font-medium">
-            <a href="#generator" onClick={() => setShowMobileMenu(false)} className="py-2 hover:text-primary transition-colors">{t('nav.generator')}</a>
-            <a href="#features" onClick={() => setShowMobileMenu(false)} className="py-2 hover:text-primary transition-colors">{t('nav.features')}</a>
-            <a href="#templates" onClick={() => setShowMobileMenu(false)} className="py-2 hover:text-primary transition-colors">{t('nav.templates')}</a>
-            <a href="#faq" onClick={() => setShowMobileMenu(false)} className="py-2 hover:text-primary transition-colors">{t('nav.faq')}</a>
+            <a href={`${linkPrefix}#generator`} onClick={() => setShowMobileMenu(false)} className="py-2 hover:text-primary transition-colors">{t('nav.generator')}</a>
+            <a href={`${linkPrefix}#features`} onClick={() => setShowMobileMenu(false)} className="py-2 hover:text-primary transition-colors">{t('nav.features')}</a>
+            <a href={`${linkPrefix}#templates`} onClick={() => setShowMobileMenu(false)} className="py-2 hover:text-primary transition-colors">{t('nav.templates')}</a>
+            <a href={`${linkPrefix}#faq`} onClick={() => setShowMobileMenu(false)} className="py-2 hover:text-primary transition-colors">{t('nav.faq')}</a>
           </div>
         </div>
       )}

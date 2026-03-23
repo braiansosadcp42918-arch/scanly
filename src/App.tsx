@@ -10,6 +10,7 @@ import NotFound from "./pages/NotFound.tsx";
 import PrivacyPolicy from "./pages/PrivacyPolicy.tsx";
 import TermsOfUse from "./pages/TermsOfUse.tsx";
 import LegalNotice from "./pages/LegalNotice.tsx";
+import ScrollToTop from "./components/ScrollToTop.tsx";
 
 const queryClient = new QueryClient();
 
@@ -17,7 +18,7 @@ const App = () => {
   const [lang, setLang] = useState<Lang>(() => {
     try {
       const stored = localStorage.getItem('scanly-lang');
-      if (stored && ['es', 'en', 'pt'].includes(stored)) return stored as Lang;
+      if (stored && ['es', 'en', 'pt', 'fr', 'de', 'it'].includes(stored)) return stored as Lang;
     } catch {}
     return 'es';
   });
@@ -41,6 +42,7 @@ const App = () => {
           <Toaster />
           <Sonner />
           <BrowserRouter>
+            <ScrollToTop />
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/privacy" element={<PrivacyPolicy />} />
