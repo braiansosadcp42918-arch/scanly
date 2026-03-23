@@ -40,10 +40,10 @@ export default function Navbar() {
         </a>
 
         <div className="hidden md:flex items-center gap-8 text-sm font-medium text-muted-foreground">
-          <a href="#generator" className="hover:text-foreground transition-colors">{t('nav.generator')}</a>
-          <a href="#features" className="hover:text-foreground transition-colors">{t('nav.features')}</a>
-          <a href="#templates" className="hover:text-foreground transition-colors">{t('nav.templates')}</a>
-          <a href="#faq" className="hover:text-foreground transition-colors">{t('nav.faq')}</a>
+          <a href={`${linkPrefix}#generator`} className="hover:text-foreground transition-colors">{t('nav.generator')}</a>
+          <a href={`${linkPrefix}#features`} className="hover:text-foreground transition-colors">{t('nav.features')}</a>
+          <a href={`${linkPrefix}#templates`} className="hover:text-foreground transition-colors">{t('nav.templates')}</a>
+          <a href={`${linkPrefix}#faq`} className="hover:text-foreground transition-colors">{t('nav.faq')}</a>
         </div>
 
         <div className="flex items-center gap-2">
