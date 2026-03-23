@@ -1,11 +1,14 @@
 import { createContext, useContext } from 'react';
 
-export type Lang = 'es' | 'en' | 'pt';
+export type Lang = 'es' | 'en' | 'pt' | 'fr' | 'de' | 'it';
 
 export const LANG_LABELS: Record<Lang, string> = {
   es: 'Español',
   en: 'English',
   pt: 'Português',
+  fr: 'Français',
+  de: 'Deutsch',
+  it: 'Italiano',
 };
 
 const translations = {
