@@ -11,6 +11,9 @@ export default function Navbar() {
   const [showLangMenu, setShowLangMenu] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const langRef = useRef<HTMLDivElement>(null);
+  const location = useLocation();
+  const isHome = location.pathname === '/';
+  const linkPrefix = isHome ? '' : '/';
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
