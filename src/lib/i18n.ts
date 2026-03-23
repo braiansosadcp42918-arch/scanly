@@ -152,6 +152,8 @@ const translations = {
     'ad.label': 'Publicidad',
     'ad.placeholder': 'Espacio publicitario',
 
+    'legal.back': 'Volver al inicio',
+
     // Content types
     'ct.url': 'URL',
     'ct.text': 'Texto',
