@@ -309,6 +309,8 @@ const translations = {
     'ad.label': 'Advertisement',
     'ad.placeholder': 'Ad space',
 
+    'legal.back': 'Back to home',
+
     'ct.url': 'URL',
     'ct.text': 'Text',
     'ct.wifi': 'WiFi',
