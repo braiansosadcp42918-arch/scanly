@@ -32,7 +32,7 @@ export default function Navbar() {
       className="sticky top-0 z-50 glass border-b border-border/50"
     >
       <div className="container flex items-center justify-between h-16">
-        <a href="#" className="flex items-center gap-2.5 font-extrabold text-xl tracking-tight">
+        <a href="/" className="flex items-center gap-2.5 font-extrabold text-xl tracking-tight">
           <div className="gradient-bg rounded-lg p-1.5">
             <QrCode className="w-5 h-5 text-primary-foreground" />
           </div>
