@@ -95,10 +95,10 @@ export default function Navbar() {
       {showMobileMenu && (
         <div className="md:hidden border-t border-border/50 bg-card/95 backdrop-blur-xl">
           <div className="container py-4 flex flex-col gap-3 text-sm font-medium">
-            <a href="#generator" onClick={() => setShowMobileMenu(false)} className="py-2 hover:text-primary transition-colors">{t('nav.generator')}</a>
-            <a href="#features" onClick={() => setShowMobileMenu(false)} className="py-2 hover:text-primary transition-colors">{t('nav.features')}</a>
-            <a href="#templates" onClick={() => setShowMobileMenu(false)} className="py-2 hover:text-primary transition-colors">{t('nav.templates')}</a>
-            <a href="#faq" onClick={() => setShowMobileMenu(false)} className="py-2 hover:text-primary transition-colors">{t('nav.faq')}</a>
+            <a href={`${linkPrefix}#generator`} onClick={() => setShowMobileMenu(false)} className="py-2 hover:text-primary transition-colors">{t('nav.generator')}</a>
+            <a href={`${linkPrefix}#features`} onClick={() => setShowMobileMenu(false)} className="py-2 hover:text-primary transition-colors">{t('nav.features')}</a>
+            <a href={`${linkPrefix}#templates`} onClick={() => setShowMobileMenu(false)} className="py-2 hover:text-primary transition-colors">{t('nav.templates')}</a>
+            <a href={`${linkPrefix}#faq`} onClick={() => setShowMobileMenu(false)} className="py-2 hover:text-primary transition-colors">{t('nav.faq')}</a>
           </div>
         </div>
       )}
