@@ -13,12 +13,15 @@ const Index = () => {
       <Navbar />
       <main>
         <HeroSection />
-        <AdBanner className="mb-8" />
+        {/* Ad Slot — Top banner */}
+        <AdBanner className="mb-8" slot="top-banner" />
         <QRGenerator />
-        <AdBanner className="my-8" />
+        {/* Ad Slot — Mid-page separator */}
+        <AdBanner className="my-8" slot="mid-separator" />
         <FeaturesSection />
         <TemplatesSection />
-        <AdBanner className="my-8" />
+        {/* Ad Slot — Bottom section */}
+        <AdBanner className="my-8" slot="bottom-section" />
         <FAQSection />
       </main>
       <Footer />
