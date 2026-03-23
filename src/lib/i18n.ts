@@ -464,6 +464,8 @@ const translations = {
     'ad.label': 'Publicidade',
     'ad.placeholder': 'Espaço publicitário',
 
+    'legal.back': 'Voltar ao início',
+
     'ct.url': 'URL',
     'ct.text': 'Texto',
     'ct.wifi': 'WiFi',
