@@ -1,11 +1,13 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
-import { QR_CONTENT_TYPES, buildQRData, type QRContentType, type QRStyle, DEFAULT_QR_STYLE, QR_PRESETS } from '@/lib/qr-types';
+import { QR_CONTENT_TYPES, buildQRData, type QRContentType, type QRStyle, DEFAULT_QR_STYLE, QR_PRESETS, QR_FRAME_TYPES, savePreferences, loadPreferences } from '@/lib/qr-types';
 import { useQRCode, useQRHistory } from '@/hooks/useQRCode';
 import { validateQRInput } from '@/lib/validation';
 import { useI18n } from '@/lib/i18n';
-import { Link, Type, Wifi, Mail, Phone, MapPin, MessageSquare, Contact, Share2, Copy, Trash2, Download, Share, Image, Palette, QrCode, Sparkles, Clock, RotateCcw, X } from 'lucide-react';
+import { Link, Type, Wifi, Mail, Phone, MapPin, MessageSquare, Contact, Share2, Copy, Trash2, Download, Share, Image, Palette, QrCode, Sparkles, Clock, RotateCcw, X, Frame } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
+import QRFrame from './QRFrame';
+import { DOT_STYLE_ICONS, CORNER_SQUARE_ICONS, CORNER_DOT_ICONS, FRAME_ICONS } from './StylePreviewIcons';
 import {
   Dialog,
   DialogContent,
@@ -33,10 +35,18 @@ const FIELD_LABEL_KEYS: Record<string, string> = {
 
 export default function QRGenerator() {
   const { t } = useI18n();
-  const [contentType, setContentType] = useState<QRContentType>('url');
+
+  // Load saved preferences
+  const savedPrefs = useMemo(() => loadPreferences(), []);
+
+  const [contentType, setContentType] = useState<QRContentType>(savedPrefs?.contentType || 'url');
   const [simpleValue, setSimpleValue] = useState('');
   const [fields, setFields] = useState<Record<string, string>>({});
-  const [style, setStyle] = useState<QRStyle>({ ...DEFAULT_QR_STYLE });
+  const [style, setStyle] = useState<QRStyle>(() => ({
+    ...DEFAULT_QR_STYLE,
+    ...(savedPrefs?.style || {}),
+    logoFile: null, // Can't restore File from localStorage
+  }));
   const [showCustomize, setShowCustomize] = useState(false);
   const [isGenerated, setIsGenerated] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
@@ -56,12 +66,36 @@ export default function QRGenerator() {
   const { containerRef, download, getBlob, isReady } = useQRCode(qrData, style);
   const { history, addToHistory, clearHistory } = useQRHistory();
 
+  // Save preferences when style or contentType changes
+  useEffect(() => {
+    if (isGenerated) {
+      const { logoFile, ...styleWithoutFile } = style;
+      savePreferences({ contentType, style: styleWithoutFile as any });
+    }
+  }, [style, contentType, isGenerated]);
+
+  // Listen for template apply events from TemplatesSection
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      if (detail?.style) {
+        setStyle(prev => ({ ...prev, ...detail.style }));
+        if (!isGenerated) {
+          toast.info(t('tpl.applyHint'));
+        } else {
+          toast.success(t('gen.presetApplied'));
+        }
+      }
+    };
+    window.addEventListener('scanly-apply-template', handler);
+    return () => window.removeEventListener('scanly-apply-template', handler);
+  }, [isGenerated, t]);
+
   // Trigger animation when QR updates
   useEffect(() => {
     if (isGenerated && qrWrapperRef.current) {
       const el = qrWrapperRef.current;
       el.style.animation = 'none';
-      // Force reflow
       void el.offsetHeight;
       el.style.animation = 'qr-pop 0.3s ease-out';
     }
@@ -127,7 +161,7 @@ export default function QRGenerator() {
       return;
     }
     setStyle(prev => ({ ...prev, ...preset.style }));
-    toast.success(`${t('gen.presetApplied')}: "${preset.name}"`);
+    toast.success(`${t('gen.presetApplied')}`);
   };
 
   const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -136,13 +170,10 @@ export default function QRGenerator() {
   };
 
   const handleReuseHistory = (item: typeof history[0]) => {
-    // Restore content type and data
     setContentType(item.type);
     setStyle({ ...item.style });
-    // Try to parse back the data into fields or simpleValue
     const cfg = QR_CONTENT_TYPES.find(c => c.type === item.type);
     if (cfg?.fields) {
-      // For complex types, we can't easily reverse-parse, just set generated
       setFields({});
       setSimpleValue('');
     } else {
@@ -168,7 +199,7 @@ export default function QRGenerator() {
           </p>
         </div>
 
-        <div className="grid lg:grid-cols-[1fr_340px] gap-8 max-w-5xl mx-auto">
+        <div className="grid lg:grid-cols-[1fr_380px] gap-8 max-w-5xl mx-auto">
           {/* Left: Input + Customization */}
           <div className="space-y-6">
             {/* Content type tabs */}
@@ -312,18 +343,23 @@ export default function QRGenerator() {
                   className="overflow-hidden"
                 >
                   <div className="bg-card rounded-2xl border border-border p-6 shadow-elevated space-y-6">
-                    {/* Presets */}
+                    {/* Presets as visual cards */}
                     <div>
                       <h4 className="text-sm font-semibold mb-3">{t('gen.presets')}</h4>
-                      <div className="flex flex-wrap gap-2">
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                         {QR_PRESETS.map(p => (
                           <button
                             key={p.name}
                             onClick={() => handlePreset(p)}
-                            className="px-3 py-1.5 rounded-lg text-xs font-medium border border-border bg-secondary hover:bg-muted transition-colors"
+                            className="flex flex-col items-center gap-1.5 p-3 rounded-xl border border-border bg-secondary/50 hover:bg-muted transition-all group"
                           >
-                            <span className="inline-block w-2.5 h-2.5 rounded-full mr-1.5" style={{ backgroundColor: p.style.dotsColor }} />
-                            {p.name}
+                            <div className="flex gap-1">
+                              <div className="w-5 h-5 rounded-full border border-border shadow-sm" style={{ backgroundColor: p.style.dotsColor }} />
+                              <div className="w-5 h-5 rounded-full border border-border shadow-sm" style={{ backgroundColor: p.style.backgroundColor }} />
+                            </div>
+                            <span className="text-[11px] font-medium text-muted-foreground group-hover:text-foreground transition-colors">
+                              {t(p.nameKey)}
+                            </span>
                           </button>
                         ))}
                       </div>
@@ -366,58 +402,130 @@ export default function QRGenerator() {
                       </div>
                     </div>
 
-                    {/* Dot styles */}
+                    {/* Dot styles - VISUAL */}
                     <div>
                       <label className="block text-xs font-medium mb-2">{t('gen.dotsStyle')}</label>
                       <div className="flex flex-wrap gap-2">
-                        {(['rounded', 'dots', 'classy', 'classy-rounded', 'square', 'extra-rounded'] as const).map(tp => (
-                          <button
-                            key={tp}
-                            onClick={() => setStyle(s => ({ ...s, dotsType: tp }))}
-                            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                              style.dotsType === tp ? 'gradient-bg text-primary-foreground' : 'bg-secondary border border-border'
-                            }`}
-                          >
-                            {tp}
-                          </button>
-                        ))}
+                        {(['square', 'rounded', 'dots', 'classy', 'classy-rounded', 'extra-rounded'] as const).map(tp => {
+                          const IconComp = DOT_STYLE_ICONS[tp];
+                          const isActive = style.dotsType === tp;
+                          return (
+                            <button
+                              key={tp}
+                              onClick={() => setStyle(s => ({ ...s, dotsType: tp }))}
+                              title={tp}
+                              className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all ${
+                                isActive
+                                  ? 'gradient-bg text-primary-foreground ring-2 ring-primary/30 shadow-premium'
+                                  : 'bg-secondary border border-border hover:bg-muted text-foreground'
+                              }`}
+                            >
+                              <IconComp color={isActive ? '#ffffff' : undefined} />
+                            </button>
+                          );
+                        })}
                       </div>
                     </div>
 
-                    {/* Corner styles */}
+                    {/* Corner styles - VISUAL */}
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <label className="block text-xs font-medium mb-2">{t('gen.outerCorners')}</label>
-                        <div className="flex flex-wrap gap-1.5">
-                          {(['dot', 'square', 'extra-rounded'] as const).map(tp => (
-                            <button
-                              key={tp}
-                              onClick={() => setStyle(s => ({ ...s, cornersSquareType: tp }))}
-                              className={`px-2.5 py-1 rounded-md text-xs transition-all ${
-                                style.cornersSquareType === tp ? 'gradient-bg text-primary-foreground' : 'bg-secondary border border-border'
-                              }`}
-                            >
-                              {tp}
-                            </button>
-                          ))}
+                        <div className="flex flex-wrap gap-2">
+                          {(['square', 'dot', 'extra-rounded'] as const).map(tp => {
+                            const IconComp = CORNER_SQUARE_ICONS[tp];
+                            const isActive = style.cornersSquareType === tp;
+                            return (
+                              <button
+                                key={tp}
+                                onClick={() => setStyle(s => ({ ...s, cornersSquareType: tp }))}
+                                title={tp}
+                                className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all ${
+                                  isActive
+                                    ? 'gradient-bg text-primary-foreground ring-2 ring-primary/30 shadow-premium'
+                                    : 'bg-secondary border border-border hover:bg-muted text-foreground'
+                                }`}
+                              >
+                                <IconComp color={isActive ? '#ffffff' : undefined} />
+                              </button>
+                            );
+                          })}
                         </div>
                       </div>
                       <div>
                         <label className="block text-xs font-medium mb-2">{t('gen.innerCorners')}</label>
-                        <div className="flex flex-wrap gap-1.5">
-                          {(['dot', 'square'] as const).map(tp => (
-                            <button
-                              key={tp}
-                              onClick={() => setStyle(s => ({ ...s, cornersDotType: tp }))}
-                              className={`px-2.5 py-1 rounded-md text-xs transition-all ${
-                                style.cornersDotType === tp ? 'gradient-bg text-primary-foreground' : 'bg-secondary border border-border'
-                              }`}
-                            >
-                              {tp}
-                            </button>
-                          ))}
+                        <div className="flex flex-wrap gap-2">
+                          {(['dot', 'square'] as const).map(tp => {
+                            const IconComp = CORNER_DOT_ICONS[tp];
+                            const isActive = style.cornersDotType === tp;
+                            return (
+                              <button
+                                key={tp}
+                                onClick={() => setStyle(s => ({ ...s, cornersDotType: tp }))}
+                                title={tp}
+                                className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all ${
+                                  isActive
+                                    ? 'gradient-bg text-primary-foreground ring-2 ring-primary/30 shadow-premium'
+                                    : 'bg-secondary border border-border hover:bg-muted text-foreground'
+                                }`}
+                              >
+                                <IconComp color={isActive ? '#ffffff' : undefined} />
+                              </button>
+                            );
+                          })}
                         </div>
                       </div>
+                    </div>
+
+                    {/* Frames - VISUAL */}
+                    <div>
+                      <label className="block text-xs font-medium mb-2">
+                        <Frame className="w-3.5 h-3.5 inline mr-1" />
+                        {t('gen.frame')}
+                      </label>
+                      <div className="flex flex-wrap gap-2 mb-3">
+                        {QR_FRAME_TYPES.map(f => {
+                          const IconComp = FRAME_ICONS[f.type];
+                          const isActive = style.frame === f.type;
+                          return (
+                            <button
+                              key={f.type}
+                              onClick={() => setStyle(s => ({ ...s, frame: f.type }))}
+                              title={t(f.labelKey)}
+                              className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all ${
+                                isActive
+                                  ? 'gradient-bg text-primary-foreground ring-2 ring-primary/30 shadow-premium'
+                                  : 'bg-secondary border border-border hover:bg-muted text-foreground'
+                              }`}
+                            >
+                              <IconComp color={isActive ? '#ffffff' : undefined} />
+                            </button>
+                          );
+                        })}
+                      </div>
+                      {style.frame !== 'none' && (
+                        <div className="space-y-3">
+                          <div>
+                            <label className="block text-[11px] text-muted-foreground mb-1">{t('gen.frameText')}</label>
+                            <input
+                              type="text"
+                              value={style.frameText}
+                              onChange={e => setStyle(s => ({ ...s, frameText: e.target.value }))}
+                              maxLength={30}
+                              className="w-full px-3 py-2 rounded-lg bg-secondary border border-border text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[11px] text-muted-foreground mb-1">{t('gen.frameColor')}</label>
+                            <input
+                              type="color"
+                              value={style.frameColor}
+                              onChange={e => setStyle(s => ({ ...s, frameColor: e.target.value }))}
+                              className="w-8 h-8 rounded-lg border border-border cursor-pointer"
+                            />
+                          </div>
+                        </div>
+                      )}
                     </div>
 
                     {/* Error correction */}
@@ -544,30 +652,34 @@ export default function QRGenerator() {
             </AnimatePresence>
           </div>
 
-          {/* Right: QR Preview — sticky on desktop, normal flow on mobile */}
+          {/* Right: QR Preview — sticky on desktop */}
           <div className="lg:self-start">
             <div className="lg:sticky lg:top-24 space-y-4">
               <div className="bg-card rounded-2xl border border-border p-8 shadow-elevated flex flex-col items-center">
                 <p className="text-xs font-medium text-muted-foreground mb-4 uppercase tracking-wider">{t('gen.preview')}</p>
 
-                <div className="relative w-[300px] h-[300px]">
-                  {/* QR container - always mounted, CSS animation on change */}
-                  <div
-                    ref={qrWrapperRef}
-                    className="w-full h-full"
-                  >
-                    <div
-                      ref={containerRef}
-                      className={`rounded-xl overflow-hidden w-full h-full ${isGenerated ? '' : 'invisible'}`}
-                      style={{ background: isGenerated && style.transparentBg ? 'repeating-conic-gradient(#e5e7eb 0% 25%, transparent 0% 50%) 0 0 / 16px 16px' : undefined }}
-                    />
-                  </div>
-                  {/* Placeholder overlay */}
-                  {!isGenerated && (
-                    <div className="absolute inset-0 rounded-xl border-2 border-dashed border-border flex flex-col items-center justify-center bg-secondary/30">
-                      <QrCode className="w-20 h-20 text-muted-foreground/20 mb-4" />
-                      <p className="text-sm font-medium text-muted-foreground">{t('gen.placeholder')}</p>
-                      <p className="text-xs text-muted-foreground/60 mt-1 text-center px-4">{t('gen.placeholderHint')}</p>
+                <div className="relative" ref={qrWrapperRef}>
+                  {isGenerated ? (
+                    <QRFrame type={style.frame} text={style.frameText} color={style.frameColor}>
+                      <div className="w-[280px] h-[280px]">
+                        <div
+                          ref={containerRef}
+                          className="rounded-xl overflow-hidden w-full h-full"
+                          style={{ background: style.transparentBg ? 'repeating-conic-gradient(#e5e7eb 0% 25%, transparent 0% 50%) 0 0 / 16px 16px' : undefined }}
+                        />
+                      </div>
+                    </QRFrame>
+                  ) : (
+                    <div className="w-[280px] h-[280px]">
+                      <div
+                        ref={containerRef}
+                        className="rounded-xl overflow-hidden w-full h-full invisible"
+                      />
+                      <div className="absolute inset-0 rounded-xl border-2 border-dashed border-border flex flex-col items-center justify-center bg-secondary/30">
+                        <QrCode className="w-20 h-20 text-muted-foreground/20 mb-4" />
+                        <p className="text-sm font-medium text-muted-foreground">{t('gen.placeholder')}</p>
+                        <p className="text-xs text-muted-foreground/60 mt-1 text-center px-4">{t('gen.placeholderHint')}</p>
+                      </div>
                     </div>
                   )}
                 </div>
