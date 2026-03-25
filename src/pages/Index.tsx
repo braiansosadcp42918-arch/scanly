@@ -6,6 +6,7 @@ import TemplatesSection from '@/components/TemplatesSection';
 import FAQSection from '@/components/FAQSection';
 import AdBanner from '@/components/AdBanner';
 import Footer from '@/components/Footer';
+import CookieConsent from '@/components/CookieConsent';
 
 const Index = () => {
   return (
@@ -25,6 +26,7 @@ const Index = () => {
         <FAQSection />
       </main>
       <Footer />
+      <CookieConsent />
     </div>
   );
 };
