@@ -5,6 +5,7 @@ import FeaturesSection from '@/components/FeaturesSection';
 import TemplatesSection from '@/components/TemplatesSection';
 import FAQSection from '@/components/FAQSection';
 import AdBanner from '@/components/AdBanner';
+import AchievementsPanel from '@/components/AchievementsPanel';
 import Footer from '@/components/Footer';
 import CookieConsent from '@/components/CookieConsent';
 
@@ -21,6 +22,7 @@ const Index = () => {
         <AdBanner className="my-8" slot="mid-separator" />
         <FeaturesSection />
         <TemplatesSection />
+        <AchievementsPanel />
         {/* Ad Slot — Bottom section */}
         <AdBanner className="my-8" slot="bottom-section" />
         <FAQSection />

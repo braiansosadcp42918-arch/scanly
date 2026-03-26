@@ -2,8 +2,10 @@ import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { QR_CONTENT_TYPES, buildQRData, type QRContentType, type QRStyle, DEFAULT_QR_STYLE, QR_PRESETS, QR_FRAME_TYPES, savePreferences, loadPreferences } from '@/lib/qr-types';
 import { useQRCode, useQRHistory } from '@/hooks/useQRCode';
 import { validateQRInput } from '@/lib/validation';
+import { encryptData } from '@/lib/crypto';
+import { trackQRCreated, trackDownload, trackLogoUsed, trackPasswordUsed, trackColorsCustomized } from '@/hooks/useAchievements';
 import { useI18n } from '@/lib/i18n';
-import { Link, Type, Wifi, Mail, Phone, MapPin, MessageSquare, Contact, Share2, Copy, Trash2, Download, Share, Image, Palette, QrCode, Sparkles, Clock, RotateCcw, X, Frame } from 'lucide-react';
+import { Link, Type, Wifi, Mail, Phone, MapPin, MessageSquare, Contact, Share2, Copy, Trash2, Download, Share, Image, Palette, QrCode, Sparkles, Clock, RotateCcw, X, Frame, Lock } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import QRFrame from './QRFrame';
@@ -53,15 +55,23 @@ export default function QRGenerator() {
   const [showDownloadModal, setShowDownloadModal] = useState(false);
   const [downloadFormat, setDownloadFormat] = useState<'png' | 'svg' | 'jpeg'>('png');
   const [showHistory, setShowHistory] = useState(false);
+  const [usePassword, setUsePassword] = useState(false);
+  const [qrPassword, setQrPassword] = useState('');
   const qrWrapperRef = useRef<HTMLDivElement>(null);
 
   const config = QR_CONTENT_TYPES.find(c => c.type === contentType)!;
 
   const qrData = useMemo(() => {
     if (!isGenerated) return '';
-    if (config.fields) return buildQRData(contentType, '', fields);
-    return buildQRData(contentType, simpleValue);
-  }, [contentType, simpleValue, fields, config, isGenerated]);
+    let data: string;
+    if (config.fields) data = buildQRData(contentType, '', fields);
+    else data = buildQRData(contentType, simpleValue);
+    if (usePassword && qrPassword) {
+      const encrypted = encryptData(data, qrPassword);
+      return `${window.location.origin}/protected?d=${encodeURIComponent(encrypted)}`;
+    }
+    return data;
+  }, [contentType, simpleValue, fields, config, isGenerated, usePassword, qrPassword]);
 
   const { containerRef, download, getBlob, isReady } = useQRCode(qrData, style);
   const { history, addToHistory, clearHistory } = useQRHistory();
@@ -110,9 +120,15 @@ export default function QRGenerator() {
       setValidationError(result.errorKey ? t(result.errorKey) : t('val.fillRequired'));
       return;
     }
+    if (usePassword && !qrPassword.trim()) {
+      setValidationError(t('val.required'));
+      return;
+    }
     setValidationError(null);
     setIsGenerated(true);
-  }, [contentType, simpleValue, fields, config, t]);
+    trackQRCreated(contentType);
+    if (usePassword) trackPasswordUsed();
+  }, [contentType, simpleValue, fields, config, t, usePassword, qrPassword]);
 
   const handleCopy = async () => {
     if (!isGenerated) return;
@@ -131,6 +147,7 @@ export default function QRGenerator() {
     if (!isGenerated) return;
     await download(downloadFormat, 'scanly-qr');
     addToHistory({ type: contentType, data: qrData, style });
+    trackDownload();
     toast.success(`${t('gen.downloaded')} ${downloadFormat.toUpperCase()}`);
     setShowDownloadModal(false);
   };
@@ -166,7 +183,10 @@ export default function QRGenerator() {
 
   const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) setStyle(prev => ({ ...prev, logoFile: file }));
+    if (file) {
+      setStyle(prev => ({ ...prev, logoFile: file }));
+      trackLogoUsed();
+    }
   };
 
   const handleReuseHistory = (item: typeof history[0]) => {
@@ -306,6 +326,32 @@ export default function QRGenerator() {
               </div>
             </div>
 
+            {/* Password protection */}
+            <div className="bg-card rounded-2xl border border-border p-4 shadow-elevated">
+              <label className="flex items-center gap-2.5 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={usePassword}
+                  onChange={e => setUsePassword(e.target.checked)}
+                  className="rounded accent-primary w-4 h-4"
+                />
+                <Lock className="w-4 h-4 text-muted-foreground" />
+                <span className="text-sm font-medium">{t('gen.passwordProtect')}</span>
+              </label>
+              {usePassword && (
+                <div className="mt-3">
+                  <input
+                    type="password"
+                    value={qrPassword}
+                    onChange={e => setQrPassword(e.target.value)}
+                    placeholder={t('gen.passwordPlaceholder')}
+                    className="w-full px-4 py-2.5 rounded-xl bg-secondary border border-border text-sm focus:outline-none focus:ring-2 focus:ring-ring transition-shadow"
+                  />
+                  <p className="text-[11px] text-muted-foreground mt-1.5">{t('gen.passwordHint')}</p>
+                </div>
+              )}
+            </div>
+
             {/* Generate button */}
             <button
               onClick={handleGenerate}
@@ -373,7 +419,7 @@ export default function QRGenerator() {
                           <input
                             type="color"
                             value={style.dotsColor}
-                            onChange={e => setStyle(s => ({ ...s, dotsColor: e.target.value }))}
+                            onChange={e => { setStyle(s => ({ ...s, dotsColor: e.target.value })); trackColorsCustomized(); }}
                             className="w-10 h-10 rounded-lg border border-border cursor-pointer"
                           />
                           <span className="text-xs text-muted-foreground">{style.dotsColor}</span>
@@ -659,7 +705,8 @@ export default function QRGenerator() {
                 <p className="text-xs font-medium text-muted-foreground mb-4 uppercase tracking-wider">{t('gen.preview')}</p>
 
                 <div className="relative" ref={qrWrapperRef}>
-                  {isGenerated ? (
+                  {/* QR container - always in DOM for stability */}
+                  <div className={!isGenerated ? 'opacity-0 absolute pointer-events-none' : ''}>
                     <QRFrame type={style.frame} text={style.frameText} color={style.frameColor}>
                       <div className="w-[280px] h-[280px]">
                         <div
@@ -669,17 +716,12 @@ export default function QRGenerator() {
                         />
                       </div>
                     </QRFrame>
-                  ) : (
-                    <div className="w-[280px] h-[280px]">
-                      <div
-                        ref={containerRef}
-                        className="rounded-xl overflow-hidden w-full h-full invisible"
-                      />
-                      <div className="absolute inset-0 rounded-xl border-2 border-dashed border-border flex flex-col items-center justify-center bg-secondary/30">
-                        <QrCode className="w-20 h-20 text-muted-foreground/20 mb-4" />
-                        <p className="text-sm font-medium text-muted-foreground">{t('gen.placeholder')}</p>
-                        <p className="text-xs text-muted-foreground/60 mt-1 text-center px-4">{t('gen.placeholderHint')}</p>
-                      </div>
+                  </div>
+                  {!isGenerated && (
+                    <div className="w-[280px] h-[280px] rounded-xl border-2 border-dashed border-border flex flex-col items-center justify-center bg-secondary/30">
+                      <QrCode className="w-20 h-20 text-muted-foreground/20 mb-4" />
+                      <p className="text-sm font-medium text-muted-foreground">{t('gen.placeholder')}</p>
+                      <p className="text-xs text-muted-foreground/60 mt-1 text-center px-4">{t('gen.placeholderHint')}</p>
                     </div>
                   )}
                 </div>

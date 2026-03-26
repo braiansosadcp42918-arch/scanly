@@ -10,6 +10,8 @@ import NotFound from "./pages/NotFound.tsx";
 import PrivacyPolicy from "./pages/PrivacyPolicy.tsx";
 import TermsOfUse from "./pages/TermsOfUse.tsx";
 import LegalNotice from "./pages/LegalNotice.tsx";
+import ProtectedQR from "./pages/ProtectedQR.tsx";
+import Dashboard from "./pages/Dashboard.tsx";
 import ScrollToTop from "./components/ScrollToTop.tsx";
 
 const queryClient = new QueryClient();
@@ -48,6 +50,8 @@ const App = () => {
               <Route path="/privacy" element={<PrivacyPolicy />} />
               <Route path="/terms" element={<TermsOfUse />} />
               <Route path="/legal" element={<LegalNotice />} />
+              <Route path="/protected" element={<ProtectedQR />} />
+              <Route path="/dashboard" element={<Dashboard />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
