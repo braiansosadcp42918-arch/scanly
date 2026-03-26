@@ -1,9 +1,9 @@
 import { useTheme } from '@/hooks/useTheme';
 import { useI18n, LANG_LABELS, type Lang } from '@/lib/i18n';
-import { Moon, Sun, QrCode, Globe, Menu, X } from 'lucide-react';
+import { Moon, Sun, QrCode, Globe, Menu, X, LayoutDashboard } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useState, useRef, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, Link as RouterLink } from 'react-router-dom';
 
 export default function Navbar() {
   const { isDark, toggle } = useTheme();
@@ -44,6 +44,7 @@ export default function Navbar() {
           <a href={`${linkPrefix}#features`} className="hover:text-foreground transition-colors">{t('nav.features')}</a>
           <a href={`${linkPrefix}#templates`} className="hover:text-foreground transition-colors">{t('nav.templates')}</a>
           <a href={`${linkPrefix}#faq`} className="hover:text-foreground transition-colors">{t('nav.faq')}</a>
+          <RouterLink to="/dashboard" className="hover:text-foreground transition-colors inline-flex items-center gap-1"><LayoutDashboard className="w-3.5 h-3.5" />{t('nav.dashboard')}</RouterLink>
         </div>
 
         <div className="flex items-center gap-2">
@@ -99,6 +100,7 @@ export default function Navbar() {
             <a href={`${linkPrefix}#features`} onClick={() => setShowMobileMenu(false)} className="py-2 hover:text-primary transition-colors">{t('nav.features')}</a>
             <a href={`${linkPrefix}#templates`} onClick={() => setShowMobileMenu(false)} className="py-2 hover:text-primary transition-colors">{t('nav.templates')}</a>
             <a href={`${linkPrefix}#faq`} onClick={() => setShowMobileMenu(false)} className="py-2 hover:text-primary transition-colors">{t('nav.faq')}</a>
+            <RouterLink to="/dashboard" onClick={() => setShowMobileMenu(false)} className="py-2 hover:text-primary transition-colors inline-flex items-center gap-1"><LayoutDashboard className="w-3.5 h-3.5" />{t('nav.dashboard')}</RouterLink>
           </div>
         </div>
       )}
