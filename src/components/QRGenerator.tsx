@@ -431,7 +431,7 @@ export default function QRGenerator() {
                           <input
                             type="color"
                             value={style.backgroundColor}
-                            onChange={e => setStyle(s => ({ ...s, backgroundColor: e.target.value }))}
+                            onChange={e => { setStyle(s => ({ ...s, backgroundColor: e.target.value })); trackColorsCustomized(); }}
                             className="w-10 h-10 rounded-lg border border-border cursor-pointer"
                             disabled={style.transparentBg}
                           />
